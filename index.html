@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- This meta tag is for compatibility with IE -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- This meta tag makes your website look good on all devices -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Japan</title>
+  <!-- This is the css file for the map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+  <!-- This is the css file for the template -->
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+  <style>
+    /* This is the css for the div that will hold the map */
+    #mapid {
+      height: 800px;
+    }
+  </style>
+</head>
+<body>
+  <!-- This is the div that will hold the map and the content -->
+  <div class="w3-row">
+    <div id="mapid" class="w3-half"></div>
+    <div id="content" class="w3-half">
+      <table class="w3-table w3-striped">
+        <tr>
+          <th>ชื่อแหล่งท่องเที่ยว</th>
+          <th>ประเภท</th>
+          <th>ระดับ</th>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Import the leaflet.js library -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+  <script>
+    // Initialize the map and set its view to our chosen geographical coordinates and a zoom level
+    var map = L.map("mapid").setView([34.661757396948545, 135.49224198631265], 12);
+
+    // Add the OpenStreetMap layer to the map
+    var osm = L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    ).addTo(map);
+    // Add the Google Satellite layer
+    var gsat = L.tileLayer(
+      "https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}"
+    );
+    // Add the OpenStreetMap HOT layer
+    var OpenStreetMap_HOT = L.tileLayer(
+      "https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png"
+    );
+    // Group all base layers into a single object
+    var baseMaps = {
+      OSM: osm,
+      GoogleSat: gsat,
+      streetmap: OpenStreetMap_HOT,
+    };
+
+    // Define our GeoJSON object with the features (locations)
+    var Japan = {
+      "type": "FeatureCollection",
+      // The 'features' property of the GeoJSON object is an array of GeoJSON feature objects.
+      "features": [
+        // Here are the locations. You can change these coordinates to place your locations
+        // You can also change the type and level to categorize your locations.
+        {
+          "type": "Feature",
+          "properties": {
+            "name": "Osaka castle",
+            "type": "สถานที่ท่องเที่ยว",
+            "level": 8
+          },
+          "geometry": {
+            "coordinates": [
+              135.52584200000342,
+              34.68732452376544
+            ],
+            "type": "Point"
+          }
+        },
+        // More locations...
+        // To add more locations, simply add more feature objects to the 'features' array.
+      ]
+    };
+
+    // Create a layer from the GeoJSON object and add it to the map
+    var tourLayer = L.geoJSON(Japan, {
+      pointToLayer: function (feature, latlng) {
+        return L.marker(latlng).bindPopup(feature.properties.name);
+      },
+      onEachFeature: function (feature, layer) {
+        layer.on("mouseover", function () {
+          document
+            .getElementById(feature.properties.name)
+            .classList.add("w3-red");
+        });
+
+        layer.on("mouseout", function () {
+          document
+            .getElementById(feature.properties.name)
+            .classList.remove("w3-red");
+        });
+      },
+    }).addTo(map);
+
+    // Generate the table that will show the locations
+    var cont = "";
+    cont += "<table class='w3-table w3-striped'>";
+    cont += "<tr>";
+    cont += "<th>ชื่อแหล่งท่องเที่ยว</th>";
+    cont += "<th>ประเภท</th>";
+    cont += "<th>ระดับ</th>";
+    cont += "</tr>";
+    for (let i in Japan.features) {
+      cont += "<tr id=" + Japan.features[i].properties.name + ">";
+      cont += "<td>" + Japan.features[i].properties.name + "</td>";
+      cont += "<td>" + Japan.features[i].properties.type + "</td>";
+      cont += "<td>" + Japan.features[i].properties.level + "</td>";
+      cont += "</tr>";
+    }
+    cont += "</table>";
+    document.getElementById("content").innerHTML = cont;
+
+    // Group all overlay layers into a single object
+    var overlays = { "สถานที่ท่องเที่ยว": tourLayer };
+    //add layer control
+    L.control.layers(baseMaps, overlays).addTo(map);
+  </script>
+</body>
+</html>
